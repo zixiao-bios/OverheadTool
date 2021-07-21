@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 
 public class MonitorService extends Service {
     // 用于Activity和service通讯
@@ -29,6 +30,8 @@ public class MonitorService extends Service {
     public void runTest(long duration, int uid){
         startTime = System.currentTimeMillis();
         endTime = startTime + duration;
+        Log.e("test", "duration=" + duration + "\nuid=" + uid);
+
         // todo 添加测试内容
     }
 }

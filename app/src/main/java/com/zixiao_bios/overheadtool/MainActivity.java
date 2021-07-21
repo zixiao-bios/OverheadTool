@@ -1,9 +1,9 @@
 package com.zixiao_bios.overheadtool;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.usage.NetworkStats;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         durationInput = findViewById(R.id.durationInputText);
 
         NetworkStatsManager networkStatsManager = getSystemService(NetworkStatsManager.class);
-//        NetworkStatsManager networkStatsManager = (NetworkStatsManager) getApplicationContext().getSystemService(Context.NETWORK_STATS_SERVICE);
         if (!NetworkStatsHelper.hasPermissionToReadNetworkHistory(this)){
             // 没有读取网络使用情况权限
             Toast.makeText(this, "请开启此应用的权限，然后重启应用", Toast.LENGTH_LONG).show();
@@ -56,6 +55,11 @@ public class MainActivity extends AppCompatActivity {
 
         // 有权限
         Toast.makeText(this, "权限获取成功", Toast.LENGTH_SHORT).show();
+
+        // 绑定MonitorService
+        Intent intent = new Intent(this, MonitorService.class);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+
         // todo 删除
         try {
             NetworkStats networkStats = networkStatsManager.queryDetailsForUid(
@@ -73,6 +77,20 @@ public class MainActivity extends AppCompatActivity {
 
     // 开始测试按钮监听
     public void clickStartTest(View view) {
-        // todo 获取输入、启动service
+        if (uidInput.getText().toString().length() > 0 && durationInput.getText().toString().length() > 0) {
+            int uid = Integer.parseInt(uidInput.getText().toString());
+            double min = Double.parseDouble(durationInput.getText().toString());
+            long duration = (long)(min * 60.0 * 1000.0);
+
+            // todo 启动service
+            new Thread(){
+                @Override
+                public void run() {
+                    monitorService.runTest(duration, uid);
+                }
+            }.start();
+        } else {
+            Toast.makeText(this, "请正确输入！", Toast.LENGTH_SHORT).show();
+        }
     }
 }
