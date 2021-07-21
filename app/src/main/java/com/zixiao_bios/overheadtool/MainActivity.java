@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
         uidInput = findViewById(R.id.uidInputText);
         durationInput = findViewById(R.id.durationInputText);
 
-        NetworkStatsManager networkStatsManager = getSystemService(NetworkStatsManager.class);
         if (!NetworkStatsHelper.hasPermissionToReadNetworkHistory(this)){
             // 没有读取网络使用情况权限
             Toast.makeText(this, "请开启此应用的权限，然后重启应用", Toast.LENGTH_LONG).show();
@@ -59,20 +58,6 @@ public class MainActivity extends AppCompatActivity {
         // 绑定MonitorService
         Intent intent = new Intent(this, MonitorService.class);
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
-
-        // todo 删除
-        try {
-            NetworkStats networkStats = networkStatsManager.queryDetailsForUid(
-                    ConnectivityManager.TYPE_WIFI,
-                    null,
-                    0,
-                    System.currentTimeMillis(),
-                    1000
-            );
-            NetworkStatsHelper.testNetworkStats(networkStats);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
     }
 
     // 开始测试按钮监听

@@ -39,7 +39,7 @@ public class NetworkStatsHelper {
      * @param networkStats 被统计的NetworkStats
      * @return 统计后生成的HashMap<String, Long>
      */
-    public static HashMap<String, Long> testNetworkStats(NetworkStats networkStats){
+    public static HashMap<String, Long> statisticNetworkStats(NetworkStats networkStats){
         long rxBytes = 0, txBytes = 0, rxPackets = 0, txPackets = 0, bucketNum = 0;
         while (networkStats.hasNextBucket()) {
             NetworkStats.Bucket bucket = new NetworkStats.Bucket();
