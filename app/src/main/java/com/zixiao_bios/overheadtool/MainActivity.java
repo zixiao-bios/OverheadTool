@@ -82,11 +82,10 @@ public class MainActivity extends AppCompatActivity {
             double min = Double.parseDouble(durationInput.getText().toString());
             long duration = (long)(min * 60.0 * 1000.0);
 
-            // todo 启动service
             new Thread(){
                 @Override
                 public void run() {
-                    monitorService.runTest(duration, uid);
+                    monitorService.runMonitor(duration, uid);
                 }
             }.start();
         } else {

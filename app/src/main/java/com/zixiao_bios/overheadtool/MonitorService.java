@@ -27,7 +27,7 @@ public class MonitorService extends Service {
      * @param duration 测试时长(ms)
      * @param uid 待测程序的uid
      */
-    public void runTest(long duration, int uid){
+    public void runMonitor(long duration, int uid){
         startTime = System.currentTimeMillis();
         endTime = startTime + duration;
         Log.e("test", "duration=" + duration + "\nuid=" + uid);
