@@ -85,19 +85,97 @@ public class CmdTool {
         // 找到该uid的信息
         // 起始字符的索引
         int startIndex = originData.substring(0, uidIndex).lastIndexOf("\n");
+        String res = originData.substring(startIndex);
+        int endIndex = res.indexOf("UID tag stats");
+        res = res.substring(0, endIndex);
 
         // 下一个uid=xxx的索引
-        int endUidIndex = originData.substring(uidIndex + 1).indexOf("uid=") + uidIndex + 1;
+//        int endUidIndex = originData.substring(uidIndex + 1).indexOf("uid=") + uidIndex + 1;
 
         // 结束字符的索引
-        int endIndex = originData.substring(0, endUidIndex).lastIndexOf("\n");
+//        int endIndex = originData.substring(0, endUidIndex).lastIndexOf("\n");
 
 //        Log.e("test", originData.substring(startIndex, endIndex));
 //        Log.i("test", originData.substring(startIndex));
 
-        return originData.substring(startIndex);
+        return res;
     }
 
+    /**
+     * 查找给定uid和set的网络使用情况
+     * @param uid uid
+     * @param set set，取值为"DEFAULT"或”FOREGROUND“
+     * @return
+     */
+    public static String findUidSetNetStatus(int uid, String set){
+        String originData = cmd("dumpsys netstats detail");
+        if (originData == null) {
+            // 命令执行结果为空
+            MyDisplay.toast("错误！命令 \"dumpsys netstats detail\" 无返回结果！");
+            Log.e(tag, "命令 \"dumpsys netstats detail\" 无返回结果");
+            return null;
+        }
+
+        int startIndex, endIndex, uidIndex, endUidIndex;
+        endIndex = originData.indexOf("UID tag stats");
+
+        // 剩余待处理字符串
+        String left = originData.substring(0, endIndex);
+        String working;
+
+        uidIndex = left.indexOf("uid=" + uid + " set=" + set);
+        if (uidIndex == -1) {
+            // 字符串中uid、set不存在
+            MyDisplay.toast("错误！ uid=" + uid + "且set=" + set + "的进程不存在！");
+            Log.e(tag, "错误！ uid=" + uid + "且set=" + set + "的进程不存在！");
+            return null;
+        }
+
+        // 开始处理
+        while (true) {
+            // 查找剩余字符串
+            uidIndex = left.indexOf("uid=" + uid + " set=" + set);
+            if (uidIndex == -1) {
+                // 剩余字符串中uid、set不存在，说明处理完成，跳出循环
+                break;
+            }
+
+            // 剩余字符串包含字符
+
+            // 剩余字符串中匹配项的第一行
+            startIndex = left.substring(0, uidIndex).lastIndexOf("\n") + 1;
+
+            // 剩余字符串中匹配项的下一项
+            endUidIndex = left.substring(uidIndex + 1).indexOf("uid=");
+
+            if (endUidIndex == -1) {
+                // 没有下一项了
+                working = left.substring(startIndex);
+
+                // 此次循环后退出
+                left = "";
+            } else {
+                // 有下一项
+                // 剩余字符串中匹配项的最后一行，即下一项的上一行
+                endIndex = left.substring(0, endUidIndex).lastIndexOf("\n");
+
+                // 从剩余字符串中取出本次处理的字符串
+                working = left.substring(startIndex, endIndex);
+
+                // 从剩余字符串中删除本次处理的字符串
+                left = left.substring(endIndex);
+            }
+
+            Log.e(tag, "working:" + working);
+        }
+        return null;
+    }
+
+    /**
+     * 通过pid查找uid，失败时返回-1
+     * @param pid pid
+     * @return uid
+     */
     public static int findUidByPid(int pid) {
         String originData = cmd("cat /proc/" + pid + "/status");
         if (originData == null) {

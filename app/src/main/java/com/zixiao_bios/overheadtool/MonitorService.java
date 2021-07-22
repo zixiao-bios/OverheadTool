@@ -54,11 +54,13 @@ public class MonitorService extends Service {
         // 测试结束
         Log.e(tag, "测试结束");
 
-        String s = CmdTool.findUidNetstats(uid, this);
+//        String s = CmdTool.findUidNetstats(uid, this);
+        String s = CmdTool.findUidSetNetStatus(uid, "FOREGROUND");
+
         if (s == null) {
             Log.e(tag, "结果为空");
         } else {
-            Log.i(tag, s);
+            Log.e(tag, s);
         }
 
         Log.e(tag, "-----------------------------------------------");
