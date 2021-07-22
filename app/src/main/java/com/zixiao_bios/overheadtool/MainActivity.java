@@ -45,15 +45,7 @@ public class MainActivity extends AppCompatActivity {
         uidInput = findViewById(R.id.uidInputText);
         durationInput = findViewById(R.id.durationInputText);
 
-        if (!NetworkStatsHelper.hasPermissionToReadNetworkHistory(this)){
-            // 没有读取网络使用情况权限
-            Toast.makeText(this, "请开启此应用的权限，然后重启应用", Toast.LENGTH_LONG).show();
-            NetworkStatsHelper.requestReadNetworkHistoryAccess(this);
-            return;
-        }
-
-        // 有权限
-        Toast.makeText(this, "权限获取成功", Toast.LENGTH_SHORT).show();
+        MyDisplay.createToast(getApplicationContext(), this);
 
         // 绑定MonitorService
         Intent intent = new Intent(this, MonitorService.class);
@@ -66,13 +58,13 @@ public class MainActivity extends AppCompatActivity {
             int uid = Integer.parseInt(uidInput.getText().toString());
             double min = Double.parseDouble(durationInput.getText().toString());
             long duration = (long)(min * 60.0 * 1000.0);
-
             new Thread(){
                 @Override
                 public void run() {
                     monitorService.runMonitor(duration, uid);
                 }
             }.start();
+//            monitorService.runMonitor(duration, uid);
         } else {
             Toast.makeText(this, "请正确输入！", Toast.LENGTH_SHORT).show();
         }
