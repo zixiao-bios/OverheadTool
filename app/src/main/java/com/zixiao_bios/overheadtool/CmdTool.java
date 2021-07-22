@@ -68,6 +68,8 @@ public class CmdTool {
         HashMap<String, Long> setForeground = findUidSetNetStats(uid, "FOREGROUND");
 
         if (setDefault == null && setForeground == null) {
+            MyDisplay.toast("错误！指定进程不存在！");
+            Log.e(tag, "错误！指定进程不存在！");
             return null;
         } else if (setDefault == null) {
             return setForeground;
@@ -103,8 +105,8 @@ public class CmdTool {
         uidIndex = left.indexOf("uid=" + uid + " set=" + set);
         if (uidIndex == -1) {
             // 字符串中uid、set不存在
-            MyDisplay.toast("错误！ uid=" + uid + "且set=" + set + "的进程不存在！");
-            Log.e(tag, "错误！ uid=" + uid + "且set=" + set + "的进程不存在！");
+//            MyDisplay.toast("错误！ uid=" + uid + "且set=" + set + "的进程不存在！");
+//            Log.e(tag, "错误！ uid=" + uid + "且set=" + set + "的进程不存在！");
             return null;
         }
 
@@ -209,7 +211,7 @@ public class CmdTool {
     }
 
     // 计算两个netstatsMap的和
-    private static HashMap<String, Long> plusNetstatsMap(HashMap<String, Long> map1, HashMap<String, Long> map2) {
+    public static HashMap<String, Long> plusNetstatsMap(HashMap<String, Long> map1, HashMap<String, Long> map2) {
         if (map1 == null || map2 == null) {
             return null;
         }
@@ -219,6 +221,20 @@ public class CmdTool {
         res.put("rp", map1.get("rp") + map2.get("rp"));
         res.put("tb", map1.get("tb") + map2.get("tb"));
         res.put("tp", map1.get("tp") + map2.get("tp"));
+        return res;
+    }
+
+    // 计算两个netstatsMap的差，map1-map2
+    public static HashMap<String, Long>subNetstatsMap(HashMap<String, Long> map1, HashMap<String, Long> map2){
+                if (map1 == null || map2 == null) {
+            return null;
+        }
+
+        HashMap<String, Long> res = new HashMap<>();
+        res.put("rb", map1.get("rb") - map2.get("rb"));
+        res.put("rp", map1.get("rp") - map2.get("rp"));
+        res.put("tb", map1.get("tb") - map2.get("tb"));
+        res.put("tp", map1.get("tp") - map2.get("tp"));
         return res;
     }
 

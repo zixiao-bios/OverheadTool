@@ -42,21 +42,26 @@ public class MonitorService extends Service {
         // 测试开始
         Log.e(tag, "-----------------------------------------\nduration=" + duration + "\nuid=" + uid);
 
-//        while (System.currentTimeMillis() < endTime) {
-//            // 测试期间
-//        }
+        // 统计开始时网络用量
+        HashMap<String, Long> netstatsMapStart = CmdTool.findUidNetstats(uid);
+
+        while (System.currentTimeMillis() < endTime) {
+            // 测试期间
+        }
 
         // 测试结束
         Log.e(tag, "测试结束");
 
-//        String s = CmdTool.findUidNetstats(uid, this);
-        HashMap<String, Long> netstatsMap = CmdTool.findUidSetNetStats(uid, "FOREGROUND");
+        // 统计结束时网络用量
+        HashMap<String, Long> netstatsMapEnd = CmdTool.findUidNetstats(uid);
 
-//        if (s == null) {
-//            Log.e(tag, "结果为空");
-//        } else {
-//            Log.e(tag, s);
-//        }
+        // 测试期间网络用量
+        HashMap<String, Long> netstatsMapUse = CmdTool.subNetstatsMap(netstatsMapEnd, netstatsMapStart);
+        if (netstatsMapUse == null) {
+            Log.e(tag, "网络统计失败");
+        } else {
+            Log.e(tag, netstatsMapUse.toString());
+        }
 
         Log.e(tag, "-----------------------------------------------");
     }
