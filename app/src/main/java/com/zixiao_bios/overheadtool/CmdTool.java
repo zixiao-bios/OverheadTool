@@ -246,12 +246,19 @@ public class CmdTool {
     public static int findUidByPid(int pid) {
         String originData = cmd("cat /proc/" + pid + "/status");
         if (originData == null) {
-            MyDisplay.toast("错误！uid查找失败！");
-            Log.e(tag, "错误！uid查找失败！");
+            MyDisplay.toast("uid查找失败，命令返回值为空！");
+            Log.e(tag, "uid查找失败，命令返回值为空！");
             return -1;
         }
 
         int startIndex = originData.indexOf("Uid");
+        if (startIndex == -1) {
+            // pid不存在
+            MyDisplay.toast("uid查找失败，指定pid不存在！");
+            Log.e(tag, "uid查找失败，指定pid不存在！");
+            return -1;
+        }
+
         String res = originData.substring(startIndex);
         startIndex = res.indexOf("\t") + 1;
         res = res.substring(startIndex);
@@ -259,5 +266,41 @@ public class CmdTool {
         res = res.substring(0, endIndex);
 
         return Integer.parseInt(res);
+    }
+
+    public static HashMap<String, Double> findPidCpuMemStats(int pid) {
+        String originData = CmdTool.cmd("top -n 1 -p " + pid + " -q -o PID");
+        if (originData == null) {
+            MyDisplay.toast("获取CPU信息失败：命令执行错误！");
+            Log.e(tag, "获取CPU信息失败：命令执行错误！");
+            return null;
+        }
+
+        if (!originData.contains(String.valueOf(pid))){
+            MyDisplay.toast("获取CPU信息失败：指定pid不存在！");
+            Log.e(tag, "获取CPU信息失败：指定pid不存在！");
+            return null;
+        }
+
+        // 初始化resMap
+        HashMap<String, Double> resMap = new HashMap<>();
+
+        // 获取物理内存占用量(MB)
+        originData = CmdTool.cmd("top -n 1 -p " + pid + " -q -o RES");
+        assert originData != null;
+        String res = originData.substring(
+                originData.indexOf(" "),
+                originData.indexOf("M")
+        ).trim();
+        resMap.put("mem", Double.parseDouble(res));
+
+        // 获取CPU占用量(%)
+        originData = CmdTool.cmd("top -n 1 -p " + pid + " -q -o %CPU");
+        assert originData != null;
+        res = originData.substring(originData.indexOf(" ")).trim();
+        res = res.substring(0, res.indexOf("\n"));
+        resMap.put("cpu", Double.parseDouble(res));
+
+        return resMap;
     }
 }

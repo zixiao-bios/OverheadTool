@@ -38,6 +38,9 @@ public class MonitorService extends Service {
         startTime = System.currentTimeMillis();
         endTime = startTime + duration;
         int uid = CmdTool.findUidByPid(pid);
+        if (uid == -1){
+            return;
+        }
 
         // 测试开始
         Log.e(tag, "-----------------------------------------\nduration=" + duration + "\nuid=" + uid);
@@ -61,6 +64,14 @@ public class MonitorService extends Service {
             Log.e(tag, "网络统计失败");
         } else {
             Log.e(tag, netstatsMapUse.toString());
+        }
+
+        // test top
+        HashMap<String, Double> resMap = CmdTool.findPidCpuMemStats(pid);
+        if (resMap == null) {
+            Log.e(tag, "CPU和内存统计失败！");
+        } else {
+            Log.e(tag, resMap.toString());
         }
 
         Log.e(tag, "-----------------------------------------------");
