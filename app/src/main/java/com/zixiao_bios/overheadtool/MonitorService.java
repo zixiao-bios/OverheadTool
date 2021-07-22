@@ -34,14 +34,15 @@ public class MonitorService extends Service {
     private final String tag = "MonitorService";
 
     /**
-     * 对一个指定uid的程序进行指定时长的性能测试
+     * 对一个指定pid的程序进行指定时长的性能测试
      *
      * @param duration 测试时长(ms)
-     * @param uid      待测程序的uid
+     * @param pid      待测程序的pid
      */
-    public void runMonitor(long duration, int uid) {
+    public void runMonitor(long duration, int pid) {
         startTime = System.currentTimeMillis();
         endTime = startTime + duration;
+        int uid = CmdTool.findUidByPid(pid);
 
         // 测试开始
         Log.e(tag, "-----------------------------------------\nduration=" + duration + "\nuid=" + uid);

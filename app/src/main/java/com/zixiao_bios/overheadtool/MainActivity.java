@@ -1,13 +1,11 @@
 package com.zixiao_bios.overheadtool;
 
 import androidx.appcompat.app.AppCompatActivity;
-import android.app.usage.NetworkStats;
+
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.app.usage.NetworkStatsManager;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
@@ -36,13 +34,13 @@ public class MainActivity extends AppCompatActivity {
     private final String tag = "MainActivity";
 
     // UI组件
-    private EditText uidInput, durationInput;
+    private EditText pidInput, durationInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        uidInput = findViewById(R.id.uidInputText);
+        pidInput = findViewById(R.id.pidInputText);
         durationInput = findViewById(R.id.durationInputText);
 
         MyDisplay.createToast(getApplicationContext(), this);
@@ -54,17 +52,16 @@ public class MainActivity extends AppCompatActivity {
 
     // 开始测试按钮监听
     public void clickStartTest(View view) {
-        if (uidInput.getText().toString().length() > 0 && durationInput.getText().toString().length() > 0) {
-            int uid = Integer.parseInt(uidInput.getText().toString());
+        if (pidInput.getText().toString().length() > 0 && durationInput.getText().toString().length() > 0) {
+            int pid = Integer.parseInt(pidInput.getText().toString());
             double min = Double.parseDouble(durationInput.getText().toString());
             long duration = (long)(min * 60.0 * 1000.0);
             new Thread(){
                 @Override
                 public void run() {
-                    monitorService.runMonitor(duration, uid);
+                    monitorService.runMonitor(duration, pid);
                 }
             }.start();
-//            monitorService.runMonitor(duration, uid);
         } else {
             Toast.makeText(this, "请正确输入！", Toast.LENGTH_SHORT).show();
         }

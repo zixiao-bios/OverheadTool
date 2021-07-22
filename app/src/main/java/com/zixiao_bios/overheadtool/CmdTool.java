@@ -97,4 +97,22 @@ public class CmdTool {
 
         return originData.substring(startIndex);
     }
+
+    public static int findUidByPid(int pid) {
+        String originData = cmd("cat /proc/" + pid + "/status");
+        if (originData == null) {
+            MyDisplay.toast("错误！uid查找失败！");
+            Log.e(tag, "错误！uid查找失败！");
+            return -1;
+        }
+
+        int startIndex = originData.indexOf("Uid");
+        String res = originData.substring(startIndex);
+        startIndex = res.indexOf("\t") + 1;
+        res = res.substring(startIndex);
+        int endIndex = res.indexOf("\t");
+        res = res.substring(0, endIndex);
+
+        return Integer.parseInt(res);
+    }
 }

@@ -20,7 +20,7 @@
             android:layout_height="wrap_content">
 
             <TableRow
-                android:id="@+id/uidRow"
+                android:id="@+id/pidRow"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="60sp"
@@ -30,10 +30,10 @@
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="UID:" />
+                    android:text="PID:" />
 
                 <EditText
-                    android:id="@+id/uidInputText"
+                    android:id="@+id/pidInputText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
