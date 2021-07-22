@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
         // 绑定MonitorService
         Intent intent = new Intent(this, MonitorService.class);
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+
+        Tools.fileTest();
     }
 
     // 开始测试按钮监听

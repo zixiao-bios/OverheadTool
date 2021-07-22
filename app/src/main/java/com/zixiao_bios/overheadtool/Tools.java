@@ -1,15 +1,17 @@
 package com.zixiao_bios.overheadtool;
 
-import android.content.Context;
-import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 
-public class CmdTool {
+public class Tools {
     public static final String tag = "cmd";
 
     /**
@@ -268,8 +270,13 @@ public class CmdTool {
         return Integer.parseInt(res);
     }
 
+    /**
+     * 获取指定pid的CPU、内存占用量，读取失败时返回null
+     * @param pid pid
+     * @return resMap
+     */
     public static HashMap<String, Double> findPidCpuMemStats(int pid) {
-        String originData = CmdTool.cmd("top -n 1 -p " + pid + " -q -o PID");
+        String originData = Tools.cmd("top -n 1 -p " + pid + " -q -o PID");
         if (originData == null) {
             MyDisplay.toast("获取CPU信息失败：命令执行错误！");
             Log.e(tag, "获取CPU信息失败：命令执行错误！");
@@ -286,7 +293,7 @@ public class CmdTool {
         HashMap<String, Double> resMap = new HashMap<>();
 
         // 获取物理内存占用量(MB)
-        originData = CmdTool.cmd("top -n 1 -p " + pid + " -q -o RES");
+        originData = Tools.cmd("top -n 1 -p " + pid + " -q -o RES");
         assert originData != null;
         String res = originData.substring(
                 originData.indexOf(" "),
@@ -295,12 +302,34 @@ public class CmdTool {
         resMap.put("mem", Double.parseDouble(res));
 
         // 获取CPU占用量(%)
-        originData = CmdTool.cmd("top -n 1 -p " + pid + " -q -o %CPU");
+        originData = Tools.cmd("top -n 1 -p " + pid + " -q -o %CPU");
         assert originData != null;
         res = originData.substring(originData.indexOf(" ")).trim();
         res = res.substring(0, res.indexOf("\n"));
         resMap.put("cpu", Double.parseDouble(res));
 
         return resMap;
+    }
+
+    public static void fileTest(){
+//        File f = new File("/sys/class/power_supply/usb/input_current_now");
+        try {
+            // usb供电电流（微安）
+            InputStream instream = new FileInputStream("/sys/class/power_supply/usb/input_current_now");
+            InputStreamReader inputreader = new InputStreamReader(instream);
+            BufferedReader buffreader = new BufferedReader(inputreader);
+
+            String line;
+            StringBuilder content = new StringBuilder();
+            //分行读取
+            while (( line = buffreader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+            instream.close();
+            Log.e("test", content.toString());
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

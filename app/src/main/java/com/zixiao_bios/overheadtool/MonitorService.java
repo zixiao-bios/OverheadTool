@@ -36,7 +36,7 @@ public class MonitorService extends Service {
      */
     public void runMonitor(long duration, int pid) {
         // 获取uid
-        int uid = CmdTool.findUidByPid(pid);
+        int uid = Tools.findUidByPid(pid);
         if (uid == -1){
             return;
         }
@@ -58,12 +58,12 @@ public class MonitorService extends Service {
         Log.e(tag, "-----------------------------------------\nduration=" + duration + "\nuid=" + uid);
 
         // 统计开始时网络用量
-        HashMap<String, Long> netstatsMapStart = CmdTool.findUidNetstats(uid);
+        HashMap<String, Long> netstatsMapStart = Tools.findUidNetstats(uid);
 
         // 测试期间
         while (System.currentTimeMillis() < endTime) {
             // 每5秒测一次CPU和内存
-            resMapEach = CmdTool.findPidCpuMemStats(pid);
+            resMapEach = Tools.findPidCpuMemStats(pid);
             if (resMapEach == null) {
                 continue;
             }
@@ -89,10 +89,10 @@ public class MonitorService extends Service {
         Log.e(tag, "测试结束");
 
         // 结束时网络用量
-        HashMap<String, Long> netstatsMapEnd = CmdTool.findUidNetstats(uid);
+        HashMap<String, Long> netstatsMapEnd = Tools.findUidNetstats(uid);
 
         // 网络总用量
-        HashMap<String, Long> netstatsMapUse = CmdTool.subNetstatsMap(netstatsMapEnd, netstatsMapStart);
+        HashMap<String, Long> netstatsMapUse = Tools.subNetstatsMap(netstatsMapEnd, netstatsMapStart);
         if (netstatsMapUse == null) {
             Log.e(tag, "网络统计失败");
         } else {
