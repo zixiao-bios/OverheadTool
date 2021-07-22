@@ -1,16 +1,11 @@
 package com.zixiao_bios.overheadtool;
 
 import android.app.Service;
-import android.app.usage.NetworkStats;
-import android.app.usage.NetworkStatsManager;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.util.Calendar;
 import java.util.HashMap;
 
 public class MonitorService extends Service {
@@ -55,13 +50,13 @@ public class MonitorService extends Service {
         Log.e(tag, "测试结束");
 
 //        String s = CmdTool.findUidNetstats(uid, this);
-        String s = CmdTool.findUidSetNetStatus(uid, "FOREGROUND");
+        HashMap<String, Long> netstatsMap = CmdTool.findUidSetNetStats(uid, "FOREGROUND");
 
-        if (s == null) {
-            Log.e(tag, "结果为空");
-        } else {
-            Log.e(tag, s);
-        }
+//        if (s == null) {
+//            Log.e(tag, "结果为空");
+//        } else {
+//            Log.e(tag, s);
+//        }
 
         Log.e(tag, "-----------------------------------------------");
     }

@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.util.HashMap;
 
 public class CmdTool {
     public static final String tag = "cmd";
@@ -57,57 +58,33 @@ public class CmdTool {
     }
 
     /**
-     * 使用 dumpsys netstats detail 命令查询指定uid进程的网络使用情况
+     * 使用 dumpsys netstats detail 命令查询指定uid进程的网络使用情况，返回netstatsMap
      *
      * @param uid     要查询的进程的uid
-     * @param context context
-     * @return 该进程的网络使用情况。若该uid存在，则为三行数据；若不存在，则为null
+     * @return netstatsMap；若uid该不存在，则为null
      */
-    public static String findUidNetstats(int uid, Context context) {
-        String originData = cmd("dumpsys netstats detail");
-        if (originData == null) {
-            // 命令执行结果为空
-            MyDisplay.toast("错误！命令 \"dumpsys netstats detail\" 无返回结果！");
-            Log.e(tag, "命令 \"dumpsys netstats detail\" 无返回结果");
+    public static HashMap<String, Long> findUidNetstats(int uid) {
+        HashMap<String, Long> setDefault = findUidSetNetStats(uid, "DEFAULT");
+        HashMap<String, Long> setForeground = findUidSetNetStats(uid, "FOREGROUND");
+
+        if (setDefault == null && setForeground == null) {
             return null;
+        } else if (setDefault == null) {
+            return setForeground;
+        } else if (setForeground == null) {
+            return setDefault;
+        } else {
+            return plusNetstatsMap(setDefault, setForeground);
         }
-
-        // 命令执行结果非空
-        // uid=uid的索引
-        int uidIndex = originData.indexOf("uid=" + uid);
-        if (uidIndex == -1) {
-            // 该uid不存在
-            MyDisplay.toast("错误！ uid=" + uid + "的进程不存在！");
-            Log.e(tag, "uid=" + uid + " 的进程不存在");
-            return null;
-        }
-
-        // 找到该uid的信息
-        // 起始字符的索引
-        int startIndex = originData.substring(0, uidIndex).lastIndexOf("\n");
-        String res = originData.substring(startIndex);
-        int endIndex = res.indexOf("UID tag stats");
-        res = res.substring(0, endIndex);
-
-        // 下一个uid=xxx的索引
-//        int endUidIndex = originData.substring(uidIndex + 1).indexOf("uid=") + uidIndex + 1;
-
-        // 结束字符的索引
-//        int endIndex = originData.substring(0, endUidIndex).lastIndexOf("\n");
-
-//        Log.e("test", originData.substring(startIndex, endIndex));
-//        Log.i("test", originData.substring(startIndex));
-
-        return res;
     }
 
     /**
-     * 查找给定uid和set的网络使用情况
+     * 查找给定uid和set的网络使用情况，返回netstatsMap
      * @param uid uid
      * @param set set，取值为"DEFAULT"或”FOREGROUND“
-     * @return
+     * @return netstatsMap
      */
-    public static String findUidSetNetStatus(int uid, String set){
+    public static HashMap<String, Long> findUidSetNetStats(int uid, String set){
         String originData = cmd("dumpsys netstats detail");
         if (originData == null) {
             // 命令执行结果为空
@@ -130,6 +107,13 @@ public class CmdTool {
             Log.e(tag, "错误！ uid=" + uid + "且set=" + set + "的进程不存在！");
             return null;
         }
+
+        // 初始化存储数据的netstatsMap
+        HashMap<String, Long> netstatsMap = new HashMap<>();
+        netstatsMap.put("rb", 0L);
+        netstatsMap.put("rp", 0L);
+        netstatsMap.put("tb", 0L);
+        netstatsMap.put("tp", 0L);
 
         // 开始处理
         while (true) {
@@ -166,9 +150,76 @@ public class CmdTool {
                 left = left.substring(endIndex);
             }
 
-            Log.e(tag, "working:" + working);
+//            Log.e(tag, "working:\n" + working);
+            netstatsMap = plusNetstatsMap(netstatsMap, countWorkingString(working));
         }
-        return null;
+        return netstatsMap;
+    }
+
+    /**
+     * 将workingString转为Map数据
+     * ------------------------------workingString示例----------------------------------------------
+     *       ident=[{type=WIFI, subType=COMBINED, networkId="1107", metered=false, defaultNetwork=true}] uid=10142 set=FOREGROUND tag=0x0
+     *         NetworkStatsHistory: bucketDuration=7200
+     *           st=1626933600 rb=3533 rp=60 tb=6247 tp=106 op=0
+     *           st=1626940800 rb=11127 rp=200 tb=22005 tp=389 op=0
+     * ---------------------------------------------------------------------------------------------
+     * @param working workingString
+     * @return HashMap<String, Long>
+     */
+    private static HashMap<String, Long> countWorkingString(String working){
+        long rb = 0, rp = 0, tb = 0, tp = 0;
+
+        // 去除前两行
+        working = working.substring(working.indexOf("\n") + 1);
+        working = working.substring(working.indexOf("\n") + 1);
+
+        // 循环处理每一行
+        String line;
+        while (working.contains("\n")) {
+            line = working.substring(0, working.indexOf("\n"));
+            working = working.substring(working.indexOf("\n") + 1);
+
+            // 从每一行中读取数据
+            rb += countKeyValue(line.substring(line.indexOf("rb")));
+            rp += countKeyValue(line.substring(line.indexOf("rp")));
+            tb += countKeyValue(line.substring(line.indexOf("tb")));
+            tp += countKeyValue(line.substring(line.indexOf("tp")));
+        }
+
+        HashMap<String, Long> valueMap = new HashMap<>();
+        valueMap.put("rb", rb);
+        valueMap.put("rp", rp);
+        valueMap.put("tb", tb);
+        valueMap.put("tp", tp);
+
+//        Log.e("rb", valueMap.toString());
+        return valueMap;
+    }
+
+    /**
+     * 从符合"a=xxx ..."格式的字符串中，以long格式读取xxx
+     * @param keyValue "a=xxx ..."
+     * @return xxx
+     */
+    private static long countKeyValue(String keyValue){
+        int startIndex = keyValue.indexOf("=") + 1;
+        int endIndex = keyValue.indexOf(" ");
+        return Long.parseLong(keyValue.substring(startIndex, endIndex));
+    }
+
+    // 计算两个netstatsMap的和
+    private static HashMap<String, Long> plusNetstatsMap(HashMap<String, Long> map1, HashMap<String, Long> map2) {
+        if (map1 == null || map2 == null) {
+            return null;
+        }
+
+        HashMap<String, Long> res = new HashMap<>();
+        res.put("rb", map1.get("rb") + map2.get("rb"));
+        res.put("rp", map1.get("rp") + map2.get("rp"));
+        res.put("tb", map1.get("tb") + map2.get("tb"));
+        res.put("tp", map1.get("tp") + map2.get("tp"));
+        return res;
     }
 
     /**
