@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MonitorService.class);
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
-        Tools.getUsbPower();
+        Tools.getUsbPowerMap();
     }
 
     // 开始测试按钮监听

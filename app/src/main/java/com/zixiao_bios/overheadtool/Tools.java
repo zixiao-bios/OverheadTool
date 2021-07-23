@@ -233,16 +233,17 @@ public class Tools {
     }
 
     // 计算两个netstatsMap的差，map1-map2
-    public static HashMap<String, Long>subNetstatsMap(HashMap<String, Long> map1, HashMap<String, Long> map2){
+    public static HashMap<String, Double> getNetUseMap(HashMap<String, Long> map1, HashMap<String, Long> map2){
                 if (map1 == null || map2 == null) {
             return null;
         }
 
-        HashMap<String, Long> res = new HashMap<>();
-        res.put("rb", map1.get("rb") - map2.get("rb"));
-        res.put("rp", map1.get("rp") - map2.get("rp"));
-        res.put("tb", map1.get("tb") - map2.get("tb"));
-        res.put("tp", map1.get("tp") - map2.get("tp"));
+        HashMap<String, Double> res = new HashMap<>();
+        res.put("rKB", (double) (map1.get("rb") - map2.get("rb")) / 1000);
+        res.put("rp", (double) map1.get("rp") - map2.get("rp"));
+        res.put("tKB", (double) (map1.get("tb") - map2.get("tb")) / 1000);
+        res.put("tp", (double) map1.get("tp") - map2.get("tp"));
+        res.put("totKB", res.get("rKB") + res.get("tKB"));
         return res;
     }
 
@@ -318,10 +319,10 @@ public class Tools {
     }
 
     /**
-     * 通过读取文件获取Usb供电的信息，计算Usb功率
-     * @return 功率(W)，读取失败时返回-1
+     * 通过读取文件获取Usb供电的信息
+     * @return usbPowerMap，读取失败时返回null
      */
-    public static double getUsbPower(){
+    public static HashMap<String, Double> getUsbPowerMap(){
         try {
             if (usbIBuffReader == null || usbVBuffReader == null) {
                 // usb电流（微安）
@@ -337,15 +338,17 @@ public class Tools {
             String usbIString = usbIBuffReader.readLine();
             String usbVString = usbVBuffReader.readLine();
 
-            // 计算功率
-            double usbI = Double.parseDouble(usbIString) / 1000000;
-            double usbV = Double.parseDouble(usbVString) / 1000000;
-            return usbI * usbV;
+            // 写powerMap
+            HashMap<String, Double> powerMap = new HashMap<>();
+            powerMap.put("usbI", Double.parseDouble(usbIString) / 1000000);
+            powerMap.put("usbV", Double.parseDouble(usbVString) / 1000000);
+            powerMap.put("usbP", powerMap.get("usbI") * powerMap.get("usbV"));
+            return powerMap;
         } catch (Exception e){
             e.printStackTrace();
             MyDisplay.toast("电源信息文件读取失败！");
             Log.e(tag, "电源信息文件读取失败！");
-            return -1;
+            return null;
         }
     }
 }
