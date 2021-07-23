@@ -30,8 +30,7 @@ public class MonitorService extends Service {
 
     private int uid, pid;
     private long duration;
-    private boolean usbRead = false;
-    private boolean usbUnread = false;
+    private boolean usbRead = false, usbUnread = false;
 
     // 测试任务信息
     public String taskMessage = "暂无信息";
@@ -175,9 +174,14 @@ public class MonitorService extends Service {
     }
 
     private void makeTestingMessage(HashMap<String, Double> resMap, HashMap<String, Double> powerMap) {
-        String msg;
+        String msg = "\n";
         if (testRun) {
-            msg = "测试中，还剩 " + Math.round((double) (endTime - System.currentTimeMillis()) / 1000) + " 秒……\n";
+            long leftTime = Math.round((double) (endTime - System.currentTimeMillis()) / 1000);
+            if (leftTime < 0) {
+                leftTime = 0;
+            }
+
+            msg += "测试中，还剩 " + leftTime + " 秒……\n";
             if (resMap == null) {
                 msg += "CPU和内存读取失败！\n";
             } else {
@@ -199,14 +203,14 @@ public class MonitorService extends Service {
     }
 
     private void makeTaskMessage() {
-        String msg = "PID:\t" + pid + "\n";
+        String msg = "\nPID:\t" + pid + "\n";
         msg += "UID:\t" + uid + "\n";
         msg += "测试时长:\t" + (double) duration / 1000 + "秒\n";
         taskMessage = msg;
     }
 
     private void makeReportMessage(HashMap<String, Double> netUseMap, HashMap<String, Double> resMap, double powerUse) {
-        String msg = "";
+        String msg = "\n";
         if (testRun) {
             msg = "等待测试结束……";
         } else {
@@ -237,5 +241,16 @@ public class MonitorService extends Service {
             }
         }
         reportMessage = msg;
+    }
+
+    public void serviceInit() {
+        usbRead = false;
+        usbUnread = false;
+        taskMessage = "暂无信息";
+        testingMessage = "暂无信息";
+        reportMessage = "等待测试结束……";
+        testRun = false;
+        reportDone = false;
+        taskMessageDone = false;
     }
 }

@@ -110,4 +110,11 @@ public class TaskInfoActivity extends AppCompatActivity {
             }
         });
     }
+
+    public void clickFinish(View view){
+        monitorService.serviceInit();
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        this.finish();
+    }
 }

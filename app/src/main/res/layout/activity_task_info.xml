@@ -87,6 +87,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="100sp"
                 android:layout_marginTop="30sp"
+                android:onClick="clickFinish"
                 android:text="完成"
                 android:visibility="invisible" />
 
