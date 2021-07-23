@@ -92,7 +92,6 @@ public class MonitorService extends Service {
 
         // 测试期间
         while (System.currentTimeMillis() < endTime) {
-            // 每1秒测一次
             // CPU和内存用量
             resMapEach = Tools.getPidCpuMemStats(pid);
             if (resMapEach != null) {
@@ -120,17 +119,17 @@ public class MonitorService extends Service {
             Log.i(tag, testingMessage);
 
             // 睡眠，且按时退出循环
-            try {
-                if (endTime - System.currentTimeMillis() >= 1000) {
-                    // 剩余时间大于1秒，则睡1秒
-                    Thread.sleep(1000);
-                } else {
-                    // 剩余时间不足1秒，则睡到endTime
-                    Thread.sleep(endTime - System.currentTimeMillis());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            try {
+//                if (endTime - System.currentTimeMillis() >= 1000) {
+//                    // 剩余时间大于1秒，则睡1秒
+//                    Thread.sleep(1000);
+//                } else {
+//                    // 剩余时间不足1秒，则睡到endTime
+//                    Thread.sleep(endTime - System.currentTimeMillis());
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
         }
 
         // 补上最后一个时间片的耗电量

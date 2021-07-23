@@ -71,8 +71,6 @@ public class Tools {
         HashMap<String, Long> setForeground = getUidSetNetStats(uid, "FOREGROUND");
 
         if (setDefault == null && setForeground == null) {
-            MyDisplay.toast("错误！指定进程不存在！");
-            Log.e(tag, "错误！指定进程不存在！");
             return null;
         } else if (setDefault == null) {
             return setForeground;
@@ -296,16 +294,16 @@ public class Tools {
         // 获取物理内存占用量(MB)
         originData = Tools.cmd("top -n 1 -p " + pid + " -q -o RES");
         assert originData != null;
-        String res = originData.substring(
-                originData.indexOf(" "),
-                originData.indexOf("M")
-        ).trim();
+        String res = originData.substring(originData.indexOf("[u") + 2).trim();
+        res = res.substring(0, res.indexOf("\n"));
+        if (res.contains("M"))
+            res = res.substring(0, res.length() - 1);
         resMap.put("mem", Double.parseDouble(res));
 
         // 获取CPU占用量(%)
         originData = Tools.cmd("top -n 1 -p " + pid + " -q -o %CPU");
         assert originData != null;
-        res = originData.substring(originData.indexOf(" ")).trim();
+        res = originData.substring(originData.indexOf("[u") + 2).trim();
         res = res.substring(0, res.indexOf("\n"));
         resMap.put("cpu", Double.parseDouble(res));
 
