@@ -87,7 +87,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="100sp"
                 android:layout_marginTop="30sp"
-                android:text="完成" />
+                android:text="完成"
+                android:visibility="invisible" />
 
         </LinearLayout>
     </ScrollView>

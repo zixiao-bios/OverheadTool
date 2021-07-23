@@ -12,12 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.OverheadTool">
-        <activity android:name=".TaskInfoActivity"></activity>
+        <activity android:name=".TaskInfoActivity" />
 
         <service
             android:name=".MonitorService"
-            android:enabled="true"
-            android:exported="true" />
+            android:exported="false" />
 
         <activity android:name=".MainActivity">
             <intent-filter>

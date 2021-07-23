@@ -42,7 +42,7 @@ public class MonitorService extends Service {
     // 测试完成的输出信息
     public String reportMessage = "等待测试结束……";
 
-    public boolean testRun = false;
+    public boolean testRun = false, reportDone = false, taskMessageDone = false;
 
     /**
      * 对一个指定pid的程序进行指定时长的性能测试
@@ -82,6 +82,7 @@ public class MonitorService extends Service {
 
         // 测试开始
         makeTaskMessage();
+        taskMessageDone = true;
         Log.i(tag, taskMessage);
 
         // 统计开始时网络用量
@@ -169,6 +170,7 @@ public class MonitorService extends Service {
 
         // 生成测试报告
         makeReportMessage(netUseMap, resMapAve, powerUse);
+        reportDone = true;
         Log.i(tag, reportMessage);
     }
 
