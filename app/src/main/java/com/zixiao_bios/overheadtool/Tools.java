@@ -15,16 +15,6 @@ import javax.security.auth.login.LoginException;
 public class Tools {
     public static final String tag = "cmd";
 
-    // usb电流（微安）
-    private static File usbIFile = null;
-    private static InputStream usbIInputStream = null;
-    private static BufferedReader usbIBuffReader = null;
-
-    // usb电压（微伏）
-    private static File usbVFile = null;
-    private static InputStream usbVInputStream = null;
-    private static BufferedReader usbVBuffReader = null;
-
     /**
      * 向命令行中输入命令，并返回结果。自动向输入命令的末尾添加换行符，命令以root权限执行
      *
@@ -327,27 +317,20 @@ public class Tools {
      * @return usbPowerMap，读取失败时返回null
      */
     public static HashMap<String, Double> getUsbPowerMap(){
+        FileInputStream usbIInputStream = null;
+        FileInputStream usbVInputStream = null;
         try {
-            if (usbIBuffReader == null || usbVBuffReader == null) {
-                // usb电流（微安）
-                usbIFile = new File("/sys/class/power_supply/usb/input_current_now");
-                usbIInputStream = new FileInputStream(usbIFile);
-                usbIBuffReader = new BufferedReader(new InputStreamReader(usbIInputStream));
+            // usb电流（微安）
+            usbIInputStream = new FileInputStream("/sys/class/power_supply/usb/input_current_now");
+            BufferedReader usbIBuffReader = new BufferedReader(new InputStreamReader(usbIInputStream));
 
-                // usb电压（微伏）
-                usbVFile = new File("/sys/class/power_supply/usb/voltage_now");
-                usbVInputStream = new FileInputStream(usbVFile);
-                usbVBuffReader = new BufferedReader(new InputStreamReader(usbVInputStream));
-            }
+            // usb电压（微伏）
+            usbVInputStream = new FileInputStream("/sys/class/power_supply/usb/voltage_now");
+            BufferedReader usbVBuffReader = new BufferedReader(new InputStreamReader(usbVInputStream));
 
             // 读文件
-            usbIBuffReader.mark((int) usbIFile.length() + 1);
-            usbVBuffReader.mark((int) usbVFile.length() + 1);
             String usbIString = usbIBuffReader.readLine();
             String usbVString = usbVBuffReader.readLine();
-            usbIBuffReader.reset();
-            usbVBuffReader.reset();
-//            Log.e(tag, usbIString + "\t" + usbVString);
 
             // 写powerMap
             HashMap<String, Double> powerMap = new HashMap<>();
@@ -360,6 +343,17 @@ public class Tools {
             MyDisplay.toast("电源信息文件读取失败！");
             Log.e(tag, "电源信息文件读取失败！");
             return null;
+        } finally {
+            try {
+                if (usbIInputStream != null) {
+                    usbIInputStream.close();
+                }
+                if (usbVInputStream != null) {
+                    usbVInputStream.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
