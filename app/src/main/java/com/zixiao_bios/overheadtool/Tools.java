@@ -4,19 +4,24 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 
+import javax.security.auth.login.LoginException;
+
 public class Tools {
     public static final String tag = "cmd";
 
     // usb电流（微安）
+    private static File usbIFile = null;
     private static InputStream usbIInputStream = null;
     private static BufferedReader usbIBuffReader = null;
 
     // usb电压（微伏）
+    private static File usbVFile = null;
     private static InputStream usbVInputStream = null;
     private static BufferedReader usbVBuffReader = null;
 
@@ -325,17 +330,24 @@ public class Tools {
         try {
             if (usbIBuffReader == null || usbVBuffReader == null) {
                 // usb电流（微安）
-                usbIInputStream = new FileInputStream("/sys/class/power_supply/usb/input_current_now");
+                usbIFile = new File("/sys/class/power_supply/usb/input_current_now");
+                usbIInputStream = new FileInputStream(usbIFile);
                 usbIBuffReader = new BufferedReader(new InputStreamReader(usbIInputStream));
 
                 // usb电压（微伏）
-                usbVInputStream = new FileInputStream("/sys/class/power_supply/usb/voltage_now");
+                usbVFile = new File("/sys/class/power_supply/usb/voltage_now");
+                usbVInputStream = new FileInputStream(usbVFile);
                 usbVBuffReader = new BufferedReader(new InputStreamReader(usbVInputStream));
             }
 
             // 读文件
+            usbIBuffReader.mark((int) usbIFile.length() + 1);
+            usbVBuffReader.mark((int) usbVFile.length() + 1);
             String usbIString = usbIBuffReader.readLine();
             String usbVString = usbVBuffReader.readLine();
+            usbIBuffReader.reset();
+            usbVBuffReader.reset();
+//            Log.e(tag, usbIString + "\t" + usbVString);
 
             // 写powerMap
             HashMap<String, Double> powerMap = new HashMap<>();
