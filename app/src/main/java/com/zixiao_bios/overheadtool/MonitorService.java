@@ -82,6 +82,7 @@ public class MonitorService extends Service {
 
         // 测试开始
         makeTaskMessage();
+        Log.i(tag, taskMessage);
 
         // 统计开始时网络用量
         HashMap<String, Long> netstatsMapStart = Tools.getUidNetstats(uid);
@@ -116,6 +117,7 @@ public class MonitorService extends Service {
 
             // 生成过程信息
             makeTestingMessage(resMapEach, powerMap);
+            Log.i(tag, testingMessage);
 
             // 睡眠，且按时退出循环
             try {
@@ -168,6 +170,7 @@ public class MonitorService extends Service {
 
         // 生成测试报告
         makeReportMessage(netUseMap, resMapAve, powerUse);
+        Log.i(tag, reportMessage);
     }
 
     private void makeTestingMessage(HashMap<String, Double> resMap, HashMap<String, Double> powerMap) {

@@ -140,9 +140,9 @@ public class Tools {
             startIndex = left.substring(0, uidIndex).lastIndexOf("\n") + 1;
 
             // 剩余字符串中匹配项的下一项
-            endUidIndex = left.substring(uidIndex + 1).indexOf("uid=");
+            endUidIndex = left.substring(uidIndex + 1).indexOf("uid=") + uidIndex + 1;
 
-            if (endUidIndex == -1) {
+            if (endUidIndex == uidIndex) {
                 // 没有下一项了
                 working = left.substring(startIndex);
 
@@ -160,7 +160,6 @@ public class Tools {
                 left = left.substring(endIndex);
             }
 
-//            Log.e(tag, "working:\n" + working);
             netstatsMap = plusNetstatsMap(netstatsMap, countWorkingString(working));
         }
         return netstatsMap;
