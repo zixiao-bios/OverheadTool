@@ -54,18 +54,20 @@ public class MainActivity extends AppCompatActivity {
 
     // 开始测试按钮监听
     public void clickStartTest(View view) {
-        if (pidInput.getText().toString().length() > 0 && durationInput.getText().toString().length() > 0) {
-            int pid = Integer.parseInt(pidInput.getText().toString());
-            double min = Double.parseDouble(durationInput.getText().toString());
-            long duration = (long)(min * 60.0 * 1000.0);
-            new Thread(){
-                @Override
-                public void run() {
-                    monitorService.runMonitor(duration, pid);
-                }
-            }.start();
-        } else {
-            Toast.makeText(this, "请正确输入！", Toast.LENGTH_SHORT).show();
-        }
+        Intent intent = new Intent(this, TaskInfoActivity.class);
+        startActivity(intent);
+//        if (pidInput.getText().toString().length() > 0 && durationInput.getText().toString().length() > 0) {
+//            int pid = Integer.parseInt(pidInput.getText().toString());
+//            double min = Double.parseDouble(durationInput.getText().toString());
+//            long duration = (long)(min * 60.0 * 1000.0);
+//            new Thread(){
+//                @Override
+//                public void run() {
+//                    monitorService.runMonitor(duration, pid);
+//                }
+//            }.start();
+//        } else {
+//            Toast.makeText(this, "请正确输入！", Toast.LENGTH_SHORT).show();
+//        }
     }
 }
