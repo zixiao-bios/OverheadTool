@@ -136,7 +136,7 @@ public class MonitorService extends Service {
         powerMap = Tools.getUsbPowerMap();
         if (powerMap != null) {
             usbRead = true;
-            powerUse += powerMap.get("usbP") * ((double) (endTime - lastPowerTime));
+            powerUse += powerMap.get("usbP") * ((double) (endTime - lastPowerTime) / 1000);
         } else {
             usbUnread = true;
             Log.e(tag, "单次电源信息读取失败！");
@@ -175,12 +175,12 @@ public class MonitorService extends Service {
     private void makeTestingMessage(HashMap<String, Double> resMap, HashMap<String, Double> powerMap) {
         String msg;
         if (testRun) {
-            msg = "测试中，还剩 " + (double) (endTime - System.currentTimeMillis()) / 1000 + " 秒……\n";
-            msg += "CPU:\t" + resMap.get("cpu") + "%\n";
-            msg += "内存:\t" + resMap.get("mem") + "MB\n";
-            msg += "USB电流:\t" + powerMap.get("usbI") * 1000 + "mA\n";
-            msg += "USB电压:\t" + powerMap.get("usbV") + "V\n";
-            msg += "USB功率:\t" + powerMap.get("usbP") + "W\n";
+            msg = "测试中，还剩 " + Math.round((double) (endTime - System.currentTimeMillis()) / 1000) + " 秒……\n";
+            msg += "CPU:\t" + resMap.get("cpu") + " %\n";
+            msg += "内存:\t" + resMap.get("mem") + " MB\n";
+            msg += "USB电流:\t" + Math.round(powerMap.get("usbI") * 1000 * 100) * 0.01 + " mA\n";
+            msg += "USB电压:\t" + Math.round(powerMap.get("usbV") * 100) * 0.01 + " V\n";
+            msg += "USB功率:\t" + Math.round(powerMap.get("usbP") * 100) * 0.01 + " W\n";
             msg += "网络信息将在测试完成后显示……\n";
         } else {
             msg = "测试完成\n";
@@ -203,8 +203,8 @@ public class MonitorService extends Service {
             if (resMap == null) {
                 msg += "CPU和内存检测失败！\n";
             } else {
-                msg += "CPU:\t" + resMap.get("cpu") + "%\n";
-                msg += "内存:\t" + resMap.get("mem") + "MB\n";
+                msg += "CPU:\t" + Math.round(resMap.get("cpu") * 100) * 0.01 + " %\n";
+                msg += "内存:\t" + Math.round(resMap.get("mem") * 100) * 0.01 + " MB\n";
             }
 
             if (!usbRead) {
@@ -213,16 +213,16 @@ public class MonitorService extends Service {
                 if (usbUnread) {
                     msg += "【警告！部分USB供电数据读取失败，可能导致结果不准确！】";
                 }
-                msg += "USB供电量:\t" + powerUse + "J\n";
+                msg += "USB供电量:\t" + Math.round(powerUse * 100) * 0.01 + " J\n";
             }
 
             if (netUseMap == null) {
                 msg += "网络流量检测失败！\n";
             } else {
-                msg += "网络流量:\t" + netUseMap.get("totKB") + "KB\n";
-                msg += "接收流量:\t" + netUseMap.get("rKB") + "KB\n";
+                msg += "网络流量:\t" + netUseMap.get("totKB") + " KB\n";
+                msg += "接收流量:\t" + netUseMap.get("rKB") + " KB\n";
                 msg += "接收数据包:\t" + netUseMap.get("rp").intValue() + "\n";
-                msg += "发送流量:\t" + netUseMap.get("tKB") + "KB\n";
+                msg += "发送流量:\t" + netUseMap.get("tKB") + " KB\n";
                 msg += "发送数据包:\t" + netUseMap.get("tp").intValue() + "\n";
             }
         }
