@@ -1,11 +1,9 @@
 package com.zixiao_bios.overheadtool;
 
 import android.util.Log;
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,6 +11,14 @@ import java.util.HashMap;
 
 public class Tools {
     public static final String tag = "cmd";
+
+    // usb电流（微安）
+    private static InputStream usbIInputStream = null;
+    private static BufferedReader usbIBuffReader = null;
+
+    // usb电压（微伏）
+    private static InputStream usbVInputStream = null;
+    private static BufferedReader usbVBuffReader = null;
 
     /**
      * 向命令行中输入命令，并返回结果。自动向输入命令的末尾添加换行符，命令以root权限执行
@@ -65,9 +71,9 @@ public class Tools {
      * @param uid     要查询的进程的uid
      * @return netstatsMap；若uid该不存在，则为null
      */
-    public static HashMap<String, Long> findUidNetstats(int uid) {
-        HashMap<String, Long> setDefault = findUidSetNetStats(uid, "DEFAULT");
-        HashMap<String, Long> setForeground = findUidSetNetStats(uid, "FOREGROUND");
+    public static HashMap<String, Long> getUidNetstats(int uid) {
+        HashMap<String, Long> setDefault = getUidSetNetStats(uid, "DEFAULT");
+        HashMap<String, Long> setForeground = getUidSetNetStats(uid, "FOREGROUND");
 
         if (setDefault == null && setForeground == null) {
             MyDisplay.toast("错误！指定进程不存在！");
@@ -88,7 +94,7 @@ public class Tools {
      * @param set set，取值为"DEFAULT"或”FOREGROUND“
      * @return netstatsMap
      */
-    public static HashMap<String, Long> findUidSetNetStats(int uid, String set){
+    public static HashMap<String, Long> getUidSetNetStats(int uid, String set){
         String originData = cmd("dumpsys netstats detail");
         if (originData == null) {
             // 命令执行结果为空
@@ -275,7 +281,7 @@ public class Tools {
      * @param pid pid
      * @return resMap
      */
-    public static HashMap<String, Double> findPidCpuMemStats(int pid) {
+    public static HashMap<String, Double> getPidCpuMemStats(int pid) {
         String originData = Tools.cmd("top -n 1 -p " + pid + " -q -o PID");
         if (originData == null) {
             MyDisplay.toast("获取CPU信息失败：命令执行错误！");
@@ -311,25 +317,35 @@ public class Tools {
         return resMap;
     }
 
-    public static void fileTest(){
-//        File f = new File("/sys/class/power_supply/usb/input_current_now");
+    /**
+     * 通过读取文件获取Usb供电的信息，计算Usb功率
+     * @return 功率(W)，读取失败时返回-1
+     */
+    public static double getUsbPower(){
         try {
-            // usb供电电流（微安）
-            InputStream instream = new FileInputStream("/sys/class/power_supply/usb/input_current_now");
-            InputStreamReader inputreader = new InputStreamReader(instream);
-            BufferedReader buffreader = new BufferedReader(inputreader);
+            if (usbIBuffReader == null || usbVBuffReader == null) {
+                // usb电流（微安）
+                usbIInputStream = new FileInputStream("/sys/class/power_supply/usb/input_current_now");
+                usbIBuffReader = new BufferedReader(new InputStreamReader(usbIInputStream));
 
-            String line;
-            StringBuilder content = new StringBuilder();
-            //分行读取
-            while (( line = buffreader.readLine()) != null) {
-                content.append(line).append("\n");
+                // usb电压（微伏）
+                usbVInputStream = new FileInputStream("/sys/class/power_supply/usb/voltage_now");
+                usbVBuffReader = new BufferedReader(new InputStreamReader(usbVInputStream));
             }
-            instream.close();
-            Log.e("test", content.toString());
 
+            // 读文件
+            String usbIString = usbIBuffReader.readLine();
+            String usbVString = usbVBuffReader.readLine();
+
+            // 计算功率
+            double usbI = Double.parseDouble(usbIString) / 1000000;
+            double usbV = Double.parseDouble(usbVString) / 1000000;
+            return usbI * usbV;
         } catch (Exception e){
             e.printStackTrace();
+            MyDisplay.toast("电源信息文件读取失败！");
+            Log.e(tag, "电源信息文件读取失败！");
+            return -1;
         }
     }
 }

@@ -58,12 +58,12 @@ public class MonitorService extends Service {
         Log.e(tag, "-----------------------------------------\nduration=" + duration + "\nuid=" + uid);
 
         // 统计开始时网络用量
-        HashMap<String, Long> netstatsMapStart = Tools.findUidNetstats(uid);
+        HashMap<String, Long> netstatsMapStart = Tools.getUidNetstats(uid);
 
         // 测试期间
         while (System.currentTimeMillis() < endTime) {
             // 每5秒测一次CPU和内存
-            resMapEach = Tools.findPidCpuMemStats(pid);
+            resMapEach = Tools.getPidCpuMemStats(pid);
             if (resMapEach == null) {
                 continue;
             }
@@ -89,7 +89,7 @@ public class MonitorService extends Service {
         Log.e(tag, "测试结束");
 
         // 结束时网络用量
-        HashMap<String, Long> netstatsMapEnd = Tools.findUidNetstats(uid);
+        HashMap<String, Long> netstatsMapEnd = Tools.getUidNetstats(uid);
 
         // 网络总用量
         HashMap<String, Long> netstatsMapUse = Tools.subNetstatsMap(netstatsMapEnd, netstatsMapStart);
