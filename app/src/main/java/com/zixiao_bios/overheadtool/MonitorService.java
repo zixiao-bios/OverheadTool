@@ -176,11 +176,19 @@ public class MonitorService extends Service {
         String msg;
         if (testRun) {
             msg = "测试中，还剩 " + Math.round((double) (endTime - System.currentTimeMillis()) / 1000) + " 秒……\n";
-            msg += "CPU:\t" + resMap.get("cpu") + " %\n";
-            msg += "内存:\t" + resMap.get("mem") + " MB\n";
-            msg += "USB电流:\t" + Math.round(powerMap.get("usbI") * 1000 * 100) * 0.01 + " mA\n";
-            msg += "USB电压:\t" + Math.round(powerMap.get("usbV") * 100) * 0.01 + " V\n";
-            msg += "USB功率:\t" + Math.round(powerMap.get("usbP") * 100) * 0.01 + " W\n";
+            if (resMap == null) {
+                msg += "CPU和内存读取失败！\n";
+            } else {
+                msg += "CPU:\t" + resMap.get("cpu") + " %\n";
+                msg += "内存:\t" + resMap.get("mem") + " MB\n";
+            }
+            if (powerMap == null) {
+                msg += "电源信息读取失败！\n";
+            } else {
+                msg += "USB电流:\t" + Math.round(powerMap.get("usbI") * 1000 * 100) * 0.01 + " mA\n";
+                msg += "USB电压:\t" + Math.round(powerMap.get("usbV") * 100) * 0.01 + " V\n";
+                msg += "USB功率:\t" + Math.round(powerMap.get("usbP") * 100) * 0.01 + " W\n";
+            }
             msg += "网络信息将在测试完成后显示……\n";
         } else {
             msg = "测试完成\n";
