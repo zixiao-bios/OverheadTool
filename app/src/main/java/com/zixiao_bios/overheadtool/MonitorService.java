@@ -31,6 +31,11 @@ public class MonitorService extends Service {
     private int uid, pid;
     private long duration;
 
+    // 每次检测的poserMap
+    HashMap<String, Double> powerMapEach;
+
+    HashMap<String, Double> powerMap = null;
+
     // 测试任务信息
     public String taskMessage = "暂无信息";
 
@@ -64,13 +69,13 @@ public class MonitorService extends Service {
         endTime = startTime + duration;
 
         // CPU、内存、功率总量
-        double cpuTot = 0, memTot = 0, powerTot = 0;
+        double cpuTot = 0, memTot = 0;
 
         // CPU、功率测量次数
-        int cpuNum = 0, powerNum = 0;
+        int cpuNum = 0;
 
         // 每次测量的resMap、powerMap
-        HashMap<String, Double> resMapEach, powerMapEach;
+        HashMap<String, Double> resMapEach;
 
         // 测试开始
         makeTaskMessage();
@@ -93,15 +98,6 @@ public class MonitorService extends Service {
                 cpuNum++;
             } else {
                 Log.e(tag, "单次CPU和内存读取失败！");
-            }
-
-            // 耗电量
-            powerMapEach = Tools.getUsbPowerMap();
-            if (powerMapEach != null) {
-                powerTot += powerMapEach.get("usbP");
-                powerNum ++;
-            } else {
-                Log.e(tag, "单次电源信息读取失败！");
             }
 
             // 生成过程信息
@@ -146,16 +142,6 @@ public class MonitorService extends Service {
             resMapAve.put("cpu", cpuTot / cpuNum);
             resMapAve.put("mem", memTot / cpuNum);
             resMapAve.put("time", (double) (endTime - startTime) / cpuNum);
-        }
-
-        // 平均功率
-        HashMap<String, Double> powerMap = null;
-        if (powerNum == 0) {
-            Log.e(tag, "USB功率统计失败");
-        } else {
-            powerMap = new HashMap<>();
-            powerMap.put("power", powerTot / powerNum);
-            powerMap.put("time", (double) (endTime - startTime) / powerNum);
         }
 
         // 生成测试报告
@@ -245,5 +231,28 @@ public class MonitorService extends Service {
         testRun = false;
         reportDone = false;
         taskMessageDone = false;
+    }
+
+    private void UsbPowerStats() {
+        int powerNum = 0;
+        double powerTot = 0;
+        while (testRun) {
+            powerMapEach = Tools.getUsbPowerMap();
+            if (powerMapEach != null) {
+                powerTot += powerMapEach.get("usbP");
+                powerNum ++;
+            } else {
+                Log.e(tag, "单次电源信息读取失败！");
+            }
+        }
+
+        // 平均功率
+        if (powerNum == 0) {
+            Log.e(tag, "USB功率统计失败");
+        } else {
+            powerMap = new HashMap<>();
+            powerMap.put("power", powerTot / powerNum);
+            powerMap.put("time", (double) (endTime - startTime) / powerNum);
+        }
     }
 }
