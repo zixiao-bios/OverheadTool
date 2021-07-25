@@ -205,19 +205,26 @@ public class MonitorService extends Service {
         if (testRun) {
             msg = "等待测试结束……";
         } else {
+            // cpu、内存信息
             if (resMap == null) {
                 msg += "CPU和内存检测失败！\n";
             } else {
                 msg += "CPU:\t" + Math.round(resMap.get("cpu") * 100) * 0.01 + " %\n";
                 msg += "内存:\t" + Math.round(resMap.get("mem") * 100) * 0.01 + " MB\n";
+                msg += "CPU平均检测间隔:\t" + Math.round(resMap.get("time") * 100) * 0.01 + " ms\n";
             }
+            msg += "-------------------------------";
 
+            // USB功率信息
             if (powerMap == null) {
                 msg += "USB功率检测失败！\n";
             } else {
-                msg += "USB平均功率:\t" + powerMap.get("power") + " W\n";
+                msg += "USB平均功率:\t" + Math.round(powerMap.get("power") * 100) * 0.01 + " W\n";
+                msg += "USB平均检测间隔:\t" + Math.round(powerMap.get("time") * 100) * 0.01 + " ms\n";
             }
+            msg += "-------------------------------";
 
+            // 网络信息
             if (netUseMap == null) {
                 msg += "网络流量检测失败！\n";
             } else {
