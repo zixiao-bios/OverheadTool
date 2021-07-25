@@ -30,7 +30,6 @@ public class MonitorService extends Service {
 
     private int uid, pid;
     private long duration;
-    private boolean usbRead = false, usbUnread = false;
 
     // 测试任务信息
     public String taskMessage = "暂无信息";
@@ -64,20 +63,14 @@ public class MonitorService extends Service {
         startTime = System.currentTimeMillis();
         endTime = startTime + duration;
 
-        // CPU、内存总用量
-        double cpuTot = 0, memTot = 0;
+        // CPU、内存、功率总量
+        double cpuTot = 0, memTot = 0, powerTot = 0;
 
-        // CPU测量次数
-        int testNum = 0;
-
-        // 用电量（J）
-        double powerUse = 0;
-
-        // 上一次、本次测量功率的时间戳
-        long lastPowerTime = startTime, thisPowerTime;
+        // CPU、功率测量次数
+        int cpuNum = 0, powerNum = 0;
 
         // 每次测量的resMap、powerMap
-        HashMap<String, Double> resMapEach, powerMap;
+        HashMap<String, Double> resMapEach, powerMapEach;
 
         // 测试开始
         makeTaskMessage();
@@ -97,25 +90,22 @@ public class MonitorService extends Service {
             if (resMapEach != null) {
                 cpuTot += resMapEach.get("cpu");
                 memTot += resMapEach.get("mem");
-                testNum++;
+                cpuNum++;
             } else {
                 Log.e(tag, "单次CPU和内存读取失败！");
             }
 
             // 耗电量
-            powerMap = Tools.getUsbPowerMap();
-            if (powerMap != null) {
-                usbRead = true;
-                thisPowerTime = System.currentTimeMillis();
-                powerUse += powerMap.get("usbP") * ((double) (thisPowerTime - lastPowerTime) / 1000);
-                lastPowerTime = thisPowerTime;
+            powerMapEach = Tools.getUsbPowerMap();
+            if (powerMapEach != null) {
+                powerTot += powerMapEach.get("usbP");
+                powerNum ++;
             } else {
-                usbUnread = true;
                 Log.e(tag, "单次电源信息读取失败！");
             }
 
             // 生成过程信息
-            makeTestingMessage(resMapEach, powerMap);
+            makeTestingMessage(resMapEach, powerMapEach);
             Log.i(tag, testingMessage);
 
             // 睡眠，且按时退出循环
@@ -130,16 +120,6 @@ public class MonitorService extends Service {
 //            } catch (Exception e) {
 //                e.printStackTrace();
 //            }
-        }
-
-        // 补上最后一个时间片的耗电量
-        powerMap = Tools.getUsbPowerMap();
-        if (powerMap != null) {
-            usbRead = true;
-            powerUse += powerMap.get("usbP") * ((double) (endTime - lastPowerTime) / 1000);
-        } else {
-            usbUnread = true;
-            Log.e(tag, "单次电源信息读取失败！");
         }
 
         // 结束时的网络用量
@@ -159,16 +139,27 @@ public class MonitorService extends Service {
 
         // CPU(%)、内存(MB)平均用量
         HashMap<String, Double> resMapAve = null;
-        if (testNum == 0) {
+        if (cpuNum == 0) {
             Log.e(tag, "CPU、内存统计失败");
         } else {
             resMapAve = new HashMap<>();
-            resMapAve.put("cpu", cpuTot / testNum);
-            resMapAve.put("mem", memTot / testNum);
+            resMapAve.put("cpu", cpuTot / cpuNum);
+            resMapAve.put("mem", memTot / cpuNum);
+            resMapAve.put("time", (double) (endTime - startTime) / cpuNum);
+        }
+
+        // 平均功率
+        HashMap<String, Double> powerMap = null;
+        if (powerNum == 0) {
+            Log.e(tag, "USB功率统计失败");
+        } else {
+            powerMap = new HashMap<>();
+            powerMap.put("power", powerTot / powerNum);
+            powerMap.put("time", (double) (endTime - startTime) / powerNum);
         }
 
         // 生成测试报告
-        makeReportMessage(netUseMap, resMapAve, powerUse);
+        makeReportMessage(netUseMap, resMapAve, powerMap);
         reportDone = true;
         Log.i(tag, reportMessage);
     }
@@ -209,7 +200,7 @@ public class MonitorService extends Service {
         taskMessage = msg;
     }
 
-    private void makeReportMessage(HashMap<String, Double> netUseMap, HashMap<String, Double> resMap, double powerUse) {
+    private void makeReportMessage(HashMap<String, Double> netUseMap, HashMap<String, Double> resMap, HashMap<String, Double> powerMap) {
         String msg = "\n";
         if (testRun) {
             msg = "等待测试结束……";
@@ -221,13 +212,10 @@ public class MonitorService extends Service {
                 msg += "内存:\t" + Math.round(resMap.get("mem") * 100) * 0.01 + " MB\n";
             }
 
-            if (!usbRead) {
-                msg += "USB供电量检测失败！\n";
+            if (powerMap == null) {
+                msg += "USB功率检测失败！\n";
             } else {
-                if (usbUnread) {
-                    msg += "【警告！部分USB供电数据读取失败，可能导致结果不准确！】";
-                }
-                msg += "USB供电量:\t" + Math.round(powerUse * 100) * 0.01 + " J\n";
+                msg += "USB平均功率:\t" + powerMap.get("power") + " W\n";
             }
 
             if (netUseMap == null) {
@@ -244,8 +232,6 @@ public class MonitorService extends Service {
     }
 
     public void serviceInit() {
-        usbRead = false;
-        usbUnread = false;
         taskMessage = "暂无信息";
         testingMessage = "暂无信息";
         reportMessage = "等待测试结束……";
