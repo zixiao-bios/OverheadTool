@@ -260,6 +260,11 @@ public class MonitorService extends Service {
             if (powerMapEach != null) {
                 powerTot += powerMapEach.get("usbP");
                 powerNum ++;
+                try {
+                    Thread.sleep(45);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             } else {
                 Log.e(tag, "单次电源信息读取失败！");
             }
