@@ -65,11 +65,20 @@ public class MainActivity extends AppCompatActivity {
             new Thread(){
                 @Override
                 public void run() {
+                    try {
+                        sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    MyDisplay.vibrate(1000);
                     monitorService.runMonitor(duration, pid);
+                    MyDisplay.vibrate(1000);
+                    monitorService.serviceInit();
                 }
             }.start();
-            Intent intent = new Intent(this, TaskInfoActivity.class);
-            startActivity(intent);
+//            Intent intent = new Intent(this, TaskInfoActivity.class);
+//            startActivity(intent);
+            MyDisplay.toast("测试5s后开始");
         } else {
             Toast.makeText(this, "请正确输入！", Toast.LENGTH_SHORT).show();
         }
