@@ -217,7 +217,7 @@ public class MonitorService extends Service {
                 msg += "内存:\t" + Math.round(resMap.get("mem") * 100) * 0.01 + " MB\n";
                 msg += "CPU平均检测间隔:\t" + Math.round(resMap.get("time") * 100) * 0.01 + " ms\n";
             }
-            msg += "-------------------------------";
+            msg += "--------------------------\n";
 
             // USB功率信息
             if (powerMap == null) {
@@ -226,7 +226,7 @@ public class MonitorService extends Service {
                 msg += "USB平均功率:\t" + Math.round(powerMap.get("power") * 100) * 0.01 + " W\n";
                 msg += "USB平均检测间隔:\t" + Math.round(powerMap.get("time") * 100) * 0.01 + " ms\n";
             }
-            msg += "-------------------------------";
+            msg += "--------------------------\n";
 
             // 网络信息
             if (netUseMap == null) {
