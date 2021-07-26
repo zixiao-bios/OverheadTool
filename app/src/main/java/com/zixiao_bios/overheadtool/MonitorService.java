@@ -69,7 +69,7 @@ public class MonitorService extends Service {
         endTime = startTime + duration;
 
         // CPU、内存、功率总量
-        double cpuTot = 0, memTot = 0;
+        double cpuTot = 0, memMax = 0;
 
         // CPU、功率测量次数
         int cpuNum = 0;
@@ -104,7 +104,7 @@ public class MonitorService extends Service {
             resMapEach = Tools.getPidCpuMemStats(pid);
             if (resMapEach != null) {
                 cpuTot += resMapEach.get("cpu");
-                memTot += resMapEach.get("mem");
+                memMax = Math.max(resMapEach.get("mem"), memMax);
                 cpuNum++;
             } else {
                 Log.e(tag, "单次CPU和内存读取失败！");
@@ -150,7 +150,7 @@ public class MonitorService extends Service {
         } else {
             resMapAve = new HashMap<>();
             resMapAve.put("cpu", cpuTot / cpuNum);
-            resMapAve.put("mem", memTot / cpuNum);
+            resMapAve.put("mem", memMax);
             resMapAve.put("time", (double) (endTime - startTime) / cpuNum);
         }
 
