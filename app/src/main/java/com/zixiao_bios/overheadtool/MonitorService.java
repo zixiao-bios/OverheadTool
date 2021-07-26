@@ -249,6 +249,7 @@ public class MonitorService extends Service {
         testRun = false;
         reportDone = false;
         taskMessageDone = false;
+        powerMap = null;
     }
 
     private void usbPowerStats() {
