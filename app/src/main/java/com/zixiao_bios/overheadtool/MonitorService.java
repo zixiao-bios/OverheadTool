@@ -82,6 +82,16 @@ public class MonitorService extends Service {
         taskMessageDone = true;
         Log.i(tag, taskMessage);
 
+        // 开启电量统计线程
+        Thread powerStatsThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.i(tag, "启动USB电源统计线程");
+                usbPowerStats();
+            }
+        });
+        powerStatsThread.start();
+
         // 统计开始时网络用量
         HashMap<String, Long> netstatsMapStart = Tools.getUidNetstats(uid);
         if (netstatsMapStart == null) {
@@ -142,6 +152,14 @@ public class MonitorService extends Service {
             resMapAve.put("cpu", cpuTot / cpuNum);
             resMapAve.put("mem", memTot / cpuNum);
             resMapAve.put("time", (double) (endTime - startTime) / cpuNum);
+        }
+
+        // 等待电源统计线程结束
+        Log.i(tag, "等待USB电源统计线程结束……");
+        try {
+            powerStatsThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         // 生成测试报告
@@ -233,7 +251,7 @@ public class MonitorService extends Service {
         taskMessageDone = false;
     }
 
-    private void UsbPowerStats() {
+    private void usbPowerStats() {
         int powerNum = 0;
         double powerTot = 0;
         while (testRun) {
