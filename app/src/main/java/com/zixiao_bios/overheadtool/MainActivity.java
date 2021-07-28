@@ -72,12 +72,12 @@ public class MainActivity extends AppCompatActivity {
                     }
 //                    MyDisplay.vibrate(1000);
                     monitorService.runMonitor(duration, pid);
-//                    MyDisplay.vibrate(1000);
+                    MyDisplay.vibrate(1000);
                     monitorService.serviceInit();
                 }
             }.start();
-//            Intent intent = new Intent(this, TaskInfoActivity.class);
-//            startActivity(intent);
+            Intent intent = new Intent(this, TaskInfoActivity.class);
+            startActivity(intent);
             MyDisplay.toast("测试5s后开始");
         } else {
             Toast.makeText(this, "请正确输入！", Toast.LENGTH_SHORT).show();
