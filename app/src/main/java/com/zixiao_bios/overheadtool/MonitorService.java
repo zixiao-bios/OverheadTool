@@ -257,7 +257,7 @@ public class MonitorService extends Service {
     }
 
     private void makeReportMessage(HashMap<String, Double> netUseMap, HashMap<String, Double> resMap, HashMap<String, Double> powerMap) {
-        String msg = "\n";
+        String msg = "\n--------------------------\n";
         if (testRun) {
             msg = "等待测试结束……";
         } else {
