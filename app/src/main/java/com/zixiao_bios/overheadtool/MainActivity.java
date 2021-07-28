@@ -70,9 +70,9 @@ public class MainActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    MyDisplay.vibrate(1000);
+//                    MyDisplay.vibrate(1000);
                     monitorService.runMonitor(duration, pid);
-                    MyDisplay.vibrate(1000);
+//                    MyDisplay.vibrate(1000);
                     monitorService.serviceInit();
                 }
             }.start();
