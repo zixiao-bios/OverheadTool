@@ -45,9 +45,10 @@ public class MainActivity extends AppCompatActivity {
 
         MyDisplay.createToast(getApplicationContext(), this);
 
+        startForegroundService(new Intent(this, MonitorService.class));
+
         // 绑定MonitorService
-        Intent intent = new Intent(MainActivity.this, MonitorService.class);
-        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+        bindService(new Intent(MainActivity.this, MonitorService.class), serviceConnection, BIND_AUTO_CREATE);
     }
 
     @Override
@@ -72,12 +73,12 @@ public class MainActivity extends AppCompatActivity {
                     }
 //                    MyDisplay.vibrate(1000);
                     monitorService.runMonitor(duration, pid);
-                    MyDisplay.vibrate(1000);
+                    MyDisplay.vibrate(3000);
                     monitorService.serviceInit();
                 }
             }.start();
-            Intent intent = new Intent(this, TaskInfoActivity.class);
-            startActivity(intent);
+//            Intent intent = new Intent(this, TaskInfoActivity.class);
+//            startActivity(intent);
             MyDisplay.toast("测试5s后开始");
         } else {
             Toast.makeText(this, "请正确输入！", Toast.LENGTH_SHORT).show();

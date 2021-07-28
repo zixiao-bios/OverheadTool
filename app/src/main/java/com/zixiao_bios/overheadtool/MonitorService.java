@@ -1,12 +1,24 @@
 package com.zixiao_bios.overheadtool;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.core.app.NotificationCompat;
+
 import java.util.HashMap;
+
+import static android.app.PendingIntent.getActivity;
 
 public class MonitorService extends Service {
     // 用于Activity和service通讯
@@ -46,6 +58,46 @@ public class MonitorService extends Service {
     public String reportMessage = "等待测试结束……";
 
     public boolean testRun = false, reportDone = false, taskMessageDone = false;
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        // Create notification channel
+        NotificationChannel channel;
+        Notification notification;
+        Intent activityIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplication(), 0, activityIntent, 0);
+        channel = new NotificationChannel("1",
+                "NotificationChannel",
+                NotificationManager.IMPORTANCE_HIGH);
+        channel.enableLights(true);
+        channel.setLightColor(Color.RED);
+        channel.setShowBadge(true);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        manager.createNotificationChannel(channel);
+
+        notification = new NotificationCompat.Builder(this, "1")
+                .setContentTitle("Overhead Tool")
+                .setContentText("正在测试……")
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentIntent(pendingIntent)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .build();
+
+        // Start foreground service
+        startForeground(1, notification);
+
+        // ref: https://llin233.github.io/2015/11/16/How-to-prevent-service/
+        flags = START_STICKY;
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
+        super.onDestroy();
+    }
 
     /**
      * 对一个指定pid的程序进行指定时长的性能测试
